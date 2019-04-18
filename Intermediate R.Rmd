@@ -348,5 +348,145 @@ vapply(cities, nchar, numeric(1))
 
 # Utilities
 
+```{r}
+# some nested functions
+li <- list(log = TRUE,
+           ch = "hello", 
+           int_vec = sort(rep(seq(8,2, by = -2), times =2)))
+li
+str(li)
+
+# check and convert type
+is.list(li)
+is.list(c(1,2))
+is.list(as.list(c(1,2)))
+
+# append(), rev()
+rev(li)
+str(append(li, rev(li)))
+
+```
+
+### Regular Expressions
+Search for patterns, ...
+
+- grep(), grepl()
+- sub(), gsub()
+
+```{r}
+animals <- c("cat", "moose", "impala")
+grepl(pattern = "a", x=animals)
+
+# starts with ca
+grepl(pattern = "^ca", animals)
+# ends with a
+grepl(pattern = "a$", animals)
+
+# grep returns indices
+grep(pattern = "^ca", animals)
+grep(pattern = "a$", animals)
+
+# replacement first only
+sub(pattern = "a|o|e|i", replacement = "_", x = animals)
+
+# complete replacement
+gsub(pattern = "a|o|e|i", replacement = "_", x = animals)
+
+#####################################
+# The emails vector has already been defined for you
+emails <- c("john.doe@ivyleague.edu", "education@world.gov", "dalai.lama@peace.org",
+            "invalid.edu", "quant@bigdatacollege.edu", "cookie.monster@sesame.tv")
+
+# Use grepl() to match for "edu"
+grepl("edu", emails)
+
+# Use grep() to match for "edu", save result to hits
+hits <- grep("edu", emails)
+
+# Subset emails using hits
+emails[hits]
+
+# Use grepl() to match for .edu addresses more robustly
+grepl("@.*\\.edu$", emails)
+
+# Use grep() to match for .edu addresses more robustly, save result to hits
+hits <- grep("@.*\\.edu$", emails)
+
+# Subset emails using hits
+emails[hits]
+
+# Use sub() to convert the email domains to datacamp.edu
+sub("@.*\\.edu$", replacement = "@datacamp.edu", emails)
+```
+
+### Times & Dates
+
+```{r}
+today <- Sys.Date()
+today
+class(today)
+
+# 
+now <- Sys.time()
+now
+class(now)
+
+# create date objects
+my_date <- as.Date("1971-05-14")
+my_date
+class(my_date)
+
+# 
+my_date <- as.Date("1971-14-05", format="%Y-%d-%m")
+my_date
+
+# create POSIXct objects
+my_time <- as.POSIXct("1971-05-14 11:25:15")
+my_time
+my_time + 1
+
+my_time2 <- as.POSIXct("1990-11-16 12:00:00" )
+
+# difference
+my_time2 - my_time
+
+# both in comparison to 1970
+unclass(my_date)
+unclass(my_time)
+
+# Definition of character strings representing dates
+str1 <- "May 23, '96"
+str2 <- "2012-03-15"
+str3 <- "30/January/2006"
+
+# Convert the strings to dates: date1, date2, date3
+date1 <- as.Date(str1, format = "%b %d, '%y")
+date2 <- as.Date(str2, format = "%Y-%m-%d")
+date3 <- as.Date(str3, format = "%d/%B/%Y")
+
+
+# Convert dates to formatted strings
+format(date1, "%A")
+format(date2, "%d")
+format(date3, "%b %Y")
+
+# check
+#?strptime
+
+# Definition of character strings representing times
+str1 <- "May 23, '96 hours:23 minutes:01 seconds:45"
+str2 <- "2012-3-12 14:23:08"
+
+# Convert the strings to POSIXct objects: time1, time2
+time1 <- as.POSIXct(str1, format = "%B %d, '%y hours:%H minutes:%M seconds:%S")
+
+time2 <- as.POSIXct(str2, format = "%Y-%m-%d %H:%M:%S")
+
+# Convert times to formatted strings
+format(time1, "%M")
+format(time2, "%I:%M %p")
+
+```
+
 
 
