@@ -62,7 +62,7 @@ if(condition1){
   expr3
 }
 ```
-Extending the example this leads to:
+Extending the example:
 ```{r}
 x <- 0
 if(x < 0){
@@ -75,4 +75,77 @@ if(x < 0){
 ```
 
 # Loops
+
+### while loop
+
+```r
+while(condition){
+  expr
+}
+```
+
+```{r}
+ctr <- 1
+while(ctr <= 7){
+  print(paste("ctr:", ctr))
+  ctr <- ctr + 1
+}
+ctr
+```
+
+- break statement
+
+```{r}
+ctr <- 1
+while (ctr <= 7){
+  if(ctr %% 5 == 0){
+    break
+  }
+  print(paste("ctr:", ctr))
+  ctr <- ctr +1
+}
+
+```
+
+### for loop
+
+```r
+for(var in seq){
+  expr
+}
+```
+- break: breaks the loop
+- next: skips whenever condition is met
+
+```{r}
+# for loop, break statement
+cities <- list("New York", "Paris","Aachen", "Cologne")
+for (city in cities){
+  if(nchar(city) == 6){
+    break
+  }
+  print(city)
+}
+
+# for loop, next statement
+for (city in cities){
+  if(nchar(city) == 6){
+    next
+  }
+  print(city)
+}
+```
+
+- Alternative looping
+
+```{r}
+for (i in 1:length(cities)){
+  print(paste("City:", i))
+  print(cities[i])
+}
+```
+
+# Functions
+
+
 

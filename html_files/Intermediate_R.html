@@ -433,7 +433,7 @@ if(x &lt; 0){
 } else {
   expr3
 }</code></pre>
-<p>Extending the example this leads to:</p>
+<p>Extending the example:</p>
 <pre class="r"><code>x &lt;- 0
 if(x &lt; 0){
   print(&quot;x is a negative number&quot;)
@@ -447,6 +447,96 @@ if(x &lt; 0){
 </div>
 <div id="loops" class="section level1">
 <h1>Loops</h1>
+<div id="while-loop" class="section level3">
+<h3>while loop</h3>
+<pre class="r"><code>while(condition){
+  expr
+}</code></pre>
+<pre class="r"><code>ctr &lt;- 1
+while(ctr &lt;= 7){
+  print(paste(&quot;ctr:&quot;, ctr))
+  ctr &lt;- ctr + 1
+}</code></pre>
+<pre><code>## [1] &quot;ctr: 1&quot;
+## [1] &quot;ctr: 2&quot;
+## [1] &quot;ctr: 3&quot;
+## [1] &quot;ctr: 4&quot;
+## [1] &quot;ctr: 5&quot;
+## [1] &quot;ctr: 6&quot;
+## [1] &quot;ctr: 7&quot;</code></pre>
+<pre class="r"><code>ctr</code></pre>
+<pre><code>## [1] 8</code></pre>
+<ul>
+<li>break statement</li>
+</ul>
+<pre class="r"><code>ctr &lt;- 1
+while (ctr &lt;= 7){
+  if(ctr %% 5 == 0){
+    break
+  }
+  print(paste(&quot;ctr:&quot;, ctr))
+  ctr &lt;- ctr +1
+}</code></pre>
+<pre><code>## [1] &quot;ctr: 1&quot;
+## [1] &quot;ctr: 2&quot;
+## [1] &quot;ctr: 3&quot;
+## [1] &quot;ctr: 4&quot;</code></pre>
+</div>
+<div id="for-loop" class="section level3">
+<h3>for loop</h3>
+<pre class="r"><code>for(var in seq){
+  expr
+}</code></pre>
+<ul>
+<li>break: breaks the loop</li>
+<li>next: skips whenever condition is met</li>
+</ul>
+<pre class="r"><code># for loop, break statement
+cities &lt;- list(&quot;New York&quot;, &quot;Paris&quot;,&quot;Aachen&quot;, &quot;Cologne&quot;)
+for (city in cities){
+  if(nchar(city) == 6){
+    break
+  }
+  print(city)
+}</code></pre>
+<pre><code>## [1] &quot;New York&quot;
+## [1] &quot;Paris&quot;</code></pre>
+<pre class="r"><code># for loop, next statement
+for (city in cities){
+  if(nchar(city) == 6){
+    next
+  }
+  print(city)
+}</code></pre>
+<pre><code>## [1] &quot;New York&quot;
+## [1] &quot;Paris&quot;
+## [1] &quot;Cologne&quot;</code></pre>
+<ul>
+<li>Alternative looping</li>
+</ul>
+<pre class="r"><code>for (i in 1:length(cities)){
+  print(paste(&quot;City:&quot;, i))
+  print(cities[i])
+}</code></pre>
+<pre><code>## [1] &quot;City: 1&quot;
+## [[1]]
+## [1] &quot;New York&quot;
+## 
+## [1] &quot;City: 2&quot;
+## [[1]]
+## [1] &quot;Paris&quot;
+## 
+## [1] &quot;City: 3&quot;
+## [[1]]
+## [1] &quot;Aachen&quot;
+## 
+## [1] &quot;City: 4&quot;
+## [[1]]
+## [1] &quot;Cologne&quot;</code></pre>
+</div>
+</div>
+<div id="functions" class="section level1">
+<h1>Functions</h1>
 </div>
 
 
