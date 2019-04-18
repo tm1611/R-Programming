@@ -448,7 +448,7 @@ if(x &lt; 0){
 <div id="loops" class="section level1">
 <h1>Loops</h1>
 <div id="while-loop" class="section level3">
-<h3>while loop</h3>
+<h3>While loop</h3>
 <pre class="r"><code>while(condition){
   expr
 }</code></pre>
@@ -645,6 +645,130 @@ search()</code></pre>
 </div>
 <div id="the-apply-family" class="section level1">
 <h1>The Apply Family</h1>
+<p>Instead of loops one can use one of the apply functions</p>
+<div id="lapply" class="section level3">
+<h3>lapply</h3>
+<pre class="r"><code>nyc &lt;- list(pop = 8405837,
+            boroughs = c(&quot;Manhattan&quot;, &quot;Bronx&quot;, &quot;Brooklyn&quot;, &quot;Queens&quot;, &quot;Staten Island&quot;),
+            capital = FALSE)
+
+# using a for-loop
+for (info in nyc){
+  print(class(info))
+}</code></pre>
+<pre><code>## [1] &quot;numeric&quot;
+## [1] &quot;character&quot;
+## [1] &quot;logical&quot;</code></pre>
+<pre class="r"><code># Use lapply
+lapply(nyc, FUN = class)</code></pre>
+<pre><code>## $pop
+## [1] &quot;numeric&quot;
+## 
+## $boroughs
+## [1] &quot;character&quot;
+## 
+## $capital
+## [1] &quot;logical&quot;</code></pre>
+<pre class="r"><code># cities
+lapply(cities, nchar)</code></pre>
+<pre><code>## [[1]]
+## [1] 8
+## 
+## [[2]]
+## [1] 5
+## 
+## [[3]]
+## [1] 6
+## 
+## [[4]]
+## [1] 7</code></pre>
+<pre class="r"><code># convert to vector
+v1 &lt;- unlist(lapply(cities, nchar))
+mean(v1)</code></pre>
+<pre><code>## [1] 6.5</code></pre>
+<ul>
+<li>Note that lapply always returns a list irrespective of input</li>
+</ul>
+<p>Next, we’ll write a function ourself and use it in connection to lapply</p>
+<pre class="r"><code># oil 
+oil_prices &lt;- round(abs(rnorm(n = 6, mean=2.5, sd=0.5)), 2)
+oil_prices</code></pre>
+<pre><code>## [1] 2.72 2.76 1.95 2.28 1.89 1.99</code></pre>
+<pre class="r"><code># function 
+multiply &lt;- function(x, factor){
+  return(factor*x)
+}
+
+# both elements together
+unlist(lapply(oil_prices, multiply, factor = 5))</code></pre>
+<pre><code>## [1] 13.60 13.80  9.75 11.40  9.45  9.95</code></pre>
+<p>More examples:</p>
+<pre class="r"><code># The vector pioneers has already been created for you
+pioneers &lt;- c(&quot;GAUSS:1777&quot;, &quot;BAYES:1702&quot;, &quot;PASCAL:1623&quot;, &quot;PEARSON:1857&quot;)
+
+# Split names from birth year
+split_math &lt;- strsplit(pioneers, split = &quot;:&quot;)
+
+# Convert to lowercase strings: split_low
+split_low &lt;- lapply(split_math, tolower)
+
+# Take a look at the structure of split_low
+str(split_low)</code></pre>
+<pre><code>## List of 4
+##  $ : chr [1:2] &quot;gauss&quot; &quot;1777&quot;
+##  $ : chr [1:2] &quot;bayes&quot; &quot;1702&quot;
+##  $ : chr [1:2] &quot;pascal&quot; &quot;1623&quot;
+##  $ : chr [1:2] &quot;pearson&quot; &quot;1857&quot;</code></pre>
+<pre class="r"><code># Write function select_first()
+select_first &lt;- function(x) {
+  x[1]
+}
+
+# Apply select_first() over split_low: names
+names &lt;- lapply(split_low, select_first)
+
+# Write function select_second()
+select_second &lt;- function(x){
+  x[2]
+}
+
+# Apply select_second() over split_low: years
+years &lt;- lapply(split_low, select_second)</code></pre>
+</div>
+<div id="sapply" class="section level3">
+<h3>sapply</h3>
+<ul>
+<li>return of a list was necessary for different heterogenous objects in list</li>
+<li>what if all have same type?</li>
+<li>sapply: short for simplified apply</li>
+</ul>
+<pre class="r"><code># cities again
+sapply(cities, nchar)</code></pre>
+<pre><code>## [1] 8 5 6 7</code></pre>
+<pre class="r"><code># </code></pre>
+</div>
+<div id="recap" class="section level3">
+<h3>Recap</h3>
+<ul>
+<li>lapply(): apply function over list or vector; output = list</li>
+<li>sapply(): apply function over list or vector; try to simplify list to array</li>
+</ul>
+</div>
+<div id="vapply" class="section level3">
+<h3>vapply</h3>
+<ul>
+<li>vapply: apply function over list or vector explicitly specify output format</li>
+</ul>
+<pre class="r"><code># cities, again
+sapply(cities, nchar)</code></pre>
+<pre><code>## [1] 8 5 6 7</code></pre>
+<pre class="r"><code>vapply(cities, nchar, numeric(1))</code></pre>
+<pre><code>## [1] 8 5 6 7</code></pre>
+<pre class="r"><code># ...</code></pre>
+</div>
+</div>
+<div id="utilities" class="section level1">
+<h1>Utilities</h1>
 </div>
 
 
