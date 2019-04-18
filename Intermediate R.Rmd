@@ -1,0 +1,73 @@
+---
+title: "Intermediate R"
+author: "Timo Meiendresch"
+output: html_document
+---
+# Conditionals and Control Flow
+
+
+## Relational Operators
+
+- Relation of R objects
+- Equality (==), Inequality (!=), greater than (>), ...
+- In strings: Alphabetical order!
+- Note that boolean TRUE coerces to 1 and FALSE to 0
+
+## Logical Operators
+Combine several queries (e.g. using several relational operators at once)
+
+- AND operator &
+- OR Operator | 
+- NOT operator !
+
+```{r}
+x <- 12
+x > 5 & x < 14
+x < 15 | x == 1
+```
+
+## Conditional Statements
+
+- if condition 
+
+```r
+if (condition) {
+  expression
+}
+```
+- if-else condition
+
+```{r}
+x <- -3
+if(x < 0){
+  print("x is a negative number")
+} else {
+  print("x is not a negative number")
+}
+```
+
+- else if statement 
+
+```r
+if(condition1){
+  expr1
+} else if(conditon2) {
+  expr2
+} else {
+  expr3
+}
+```
+Extending the example this leads to:
+```{r}
+x <- 0
+if(x < 0){
+  print("x is a negative number")
+} else if(x == 0) {
+  print("x is zero")
+} else {
+  print("x is not a negative number")
+}
+```
+
+# Loops
+
