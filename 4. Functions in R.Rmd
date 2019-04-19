@@ -99,6 +99,55 @@ Lists:
 - complicated return objects are lists, ie from lm()
 
 ### for loops
+Parts of a for loop
 
+- sequence
+- body
+- 
+
+```{r}
+# looping over cols in a df
+df <- data.frame(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+for (i in 1:ncol(df)) {
+  print(median(df[[i]]))
+}
+
+```
+
+Moving forward, we'll see a safer way to generate the sequence using `seq_along()` and saving the output instead of printing it. 
+
+```{r}
+# Replace the 1:ncol(df) sequence
+for (i in seq_along(df)) {
+  print(median(df[[i]]))
+}
+
+# Create an empty data frame
+empty_df <- data.frame()
+
+# Repeat for loop to verify there is no error
+for (i in seq_along(empty_df)) {
+  print(median(empty_df[[i]]))
+}
+
+# Create new double vector: output
+output <- vector(mode = "double", ncol(df))
+
+# Alter the loop
+for (i in seq_along(df)) {
+  # Change code to store result in output
+  output[[i]] <- median(df[[i]])
+}
+
+# Print output
+print(output)
+
+```
 
 

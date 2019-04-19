@@ -380,9 +380,153 @@ $(document).ready(function () {
 </div>
 
 
-<p><code>{r setup, include=FALSE} knitr::opts_chunk$set(echo = TRUE)</code></p>
 <div id="functions-in-r" class="section level1">
 <h1>Functions in R</h1>
+<p>Recall the elements of a function in R:</p>
+<ul>
+<li>formals</li>
+<li>body</li>
+<li>environment</li>
+</ul>
+<pre class="r"><code># typical function definition
+add &lt;- function(x, y=1){
+  x+y
+}
+
+# 
+args(add)</code></pre>
+<pre><code>## function (x, y = 1) 
+## NULL</code></pre>
+<pre class="r"><code>formals(add)</code></pre>
+<pre><code>## $x
+## 
+## 
+## $y
+## [1] 1</code></pre>
+<pre class="r"><code>body(add)</code></pre>
+<pre><code>## {
+##     x + y
+## }</code></pre>
+<pre class="r"><code>environment(add)</code></pre>
+<pre><code>## &lt;environment: 0x0000000013197c08&gt;</code></pre>
+<ul>
+<li>Last expression evaluated in a function is the return value</li>
+<li><code>return(value)</code> forces the function to stop execution and return value</li>
+<li>anonymous functions: functions without a name</li>
+</ul>
+<pre class="r"><code># anonymous function
+(function(x){x+1})(2)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<p>Three parts of a function:</p>
+<ul>
+<li>arguments</li>
+<li>body</li>
+<li>environment</li>
+</ul>
+<div id="environments" class="section level3">
+<h3>Environments</h3>
+<p>Scoping describes how R looks up values by name. If a name isn’t defined inside a function, R will look one level up.</p>
+<pre class="r"><code>x &lt;- 2
+g &lt;- function(){
+  y &lt;- 1
+  c(x,y)
+}
+
+g()</code></pre>
+<pre><code>## [1] 2 1</code></pre>
+<pre class="r"><code># </code></pre>
+<p>Scoping describes where, not when, to look for a value</p>
+<pre class="r"><code># depends on environment 
+f &lt;- function() x
+x &lt;- 15
+f()</code></pre>
+<pre><code>## [1] 15</code></pre>
+<pre class="r"><code># x in env is change
+x &lt;- 20
+f()</code></pre>
+<pre><code>## [1] 20</code></pre>
+<ul>
+<li>When you call a function, a new environment is made for the function to do its work.</li>
+<li>New env is populated with the argument values</li>
+<li>Objects are looked for first in this environment</li>
+</ul>
+</div>
+<div id="data-structures" class="section level3">
+<h3>Data Structures</h3>
+<pre class="r"><code>typeof(letters)</code></pre>
+<pre><code>## [1] &quot;character&quot;</code></pre>
+<pre class="r"><code>typeof(1:10)</code></pre>
+<pre><code>## [1] &quot;integer&quot;</code></pre>
+<pre class="r"><code>typeof(NULL)</code></pre>
+<pre><code>## [1] &quot;NULL&quot;</code></pre>
+<pre class="r"><code>length(NULL)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>typeof(NA)</code></pre>
+<pre><code>## [1] &quot;logical&quot;</code></pre>
+<pre class="r"><code>length(NA)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<ul>
+<li>Missing values are contagious!</li>
+</ul>
+<p>Lists:</p>
+<ul>
+<li>Useful because they can contain heterogeneous objects</li>
+<li>complicated return objects are lists, ie from lm()</li>
+</ul>
+</div>
+<div id="for-loops" class="section level3">
+<h3>for loops</h3>
+<p>Parts of a for loop</p>
+<ul>
+<li>sequence</li>
+<li>body</li>
+<li></li>
+</ul>
+<pre class="r"><code># looping over cols in a df
+df &lt;- data.frame(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+for (i in 1:ncol(df)) {
+  print(median(df[[i]]))
+}</code></pre>
+<pre><code>## [1] 0.2971782
+## [1] -0.1780418
+## [1] -0.6261635
+## [1] 0.2124826</code></pre>
+<p>Moving forward, we’ll see a safer way to generate the sequence using <code>seq_along()</code> and saving the output instead of printing it.</p>
+<pre class="r"><code># Replace the 1:ncol(df) sequence
+for (i in seq_along(df)) {
+  print(median(df[[i]]))
+}</code></pre>
+<pre><code>## [1] 0.2971782
+## [1] -0.1780418
+## [1] -0.6261635
+## [1] 0.2124826</code></pre>
+<pre class="r"><code># Create an empty data frame
+empty_df &lt;- data.frame()
+
+# Repeat for loop to verify there is no error
+for (i in seq_along(empty_df)) {
+  print(median(empty_df[[i]]))
+}
+
+# Create new double vector: output
+output &lt;- vector(mode = &quot;double&quot;, ncol(df))
+
+# Alter the loop
+for (i in seq_along(df)) {
+  # Change code to store result in output
+  output[[i]] &lt;- median(df[[i]])
+}
+
+# Print output
+print(output)</code></pre>
+<pre><code>## [1]  0.2971782 -0.1780418 -0.6261635  0.2124826</code></pre>
+</div>
 </div>
 
 
