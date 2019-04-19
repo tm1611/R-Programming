@@ -75,11 +75,30 @@ f()
 # x in env is change
 x <- 20
 f()
-
-
 ```
 
+- When you call a function, a new environment is made for the function to do its work.
+- New env is populated with the argument values
+- Objects are looked for first in this environment
 
+### Data Structures
+```{r}
+typeof(letters)
+typeof(1:10)
+typeof(NULL)
+length(NULL)
+typeof(NA)
+length(NA)
+```
+
+- Missing values are contagious!
+
+Lists:
+
+- Useful because they can contain heterogeneous objects
+- complicated return objects are lists, ie from lm()
+
+### for loops
 
 
 
