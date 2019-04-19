@@ -1,0 +1,85 @@
+---
+title: "4. Writing Functions in R"
+author: "Timo Meiendresch"
+knit: (function(input_file, encoding) {
+  out_dir <- 'html_files';
+  rmarkdown::render(input_file,
+  encoding=encoding,
+  output_file=file.path(dirname(input_file), out_dir, 'Intermediate_R.html'))})
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Functions in R
+Recall the elements of a function in R: 
+
+- formals
+- body
+- environment
+
+```{r}
+# typical function definition
+add <- function(x, y=1){
+  x+y
+}
+
+# 
+args(add)
+formals(add)
+body(add)
+environment(add)
+```
+
+- Last expression evaluated in a function is the return value
+- `return(value)` forces the function to stop execution and return value 
+- anonymous functions: functions without a name
+
+```{r}
+# anonymous function
+(function(x){x+1})(2)
+```
+
+Three parts of a function:
+
+- arguments
+- body
+- environment 
+
+### Environments
+Scoping describes how R looks up values by name. If a name isn't defined inside a function, R will look one level up.
+
+```{r}
+x <- 2
+g <- function(){
+  y <- 1
+  c(x,y)
+}
+
+g()
+
+# 
+
+
+```
+
+Scoping describes where, not when, to look for a value
+
+```{r}
+# depends on environment 
+f <- function() x
+x <- 15
+f()
+
+# x in env is change
+x <- 20
+f()
+
+
+```
+
+
+
+
+
