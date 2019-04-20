@@ -408,7 +408,7 @@ args(add)</code></pre>
 ##     x + y
 ## }</code></pre>
 <pre class="r"><code>environment(add)</code></pre>
-<pre><code>## &lt;environment: 0x0000000013197c08&gt;</code></pre>
+<pre><code>## &lt;environment: 0x0000000013197b58&gt;</code></pre>
 <ul>
 <li>Last expression evaluated in a function is the return value</li>
 <li><code>return(value)</code> forces the function to stop execution and return value</li>
@@ -493,19 +493,19 @@ df &lt;- data.frame(
 for (i in 1:ncol(df)) {
   print(median(df[[i]]))
 }</code></pre>
-<pre><code>## [1] 0.2971782
-## [1] -0.1780418
-## [1] -0.6261635
-## [1] 0.2124826</code></pre>
+<pre><code>## [1] 0.5316316
+## [1] -0.02943903
+## [1] -0.1689589
+## [1] -0.1345383</code></pre>
 <p>Moving forward, we’ll see a safer way to generate the sequence using <code>seq_along()</code> and saving the output instead of printing it.</p>
 <pre class="r"><code># Replace the 1:ncol(df) sequence
 for (i in seq_along(df)) {
   print(median(df[[i]]))
 }</code></pre>
-<pre><code>## [1] 0.2971782
-## [1] -0.1780418
-## [1] -0.6261635
-## [1] 0.2124826</code></pre>
+<pre><code>## [1] 0.5316316
+## [1] -0.02943903
+## [1] -0.1689589
+## [1] -0.1345383</code></pre>
 <pre class="r"><code># Create an empty data frame
 empty_df &lt;- data.frame()
 
@@ -525,8 +525,114 @@ for (i in seq_along(df)) {
 
 # Print output
 print(output)</code></pre>
-<pre><code>## [1]  0.2971782 -0.1780418 -0.6261635  0.2124826</code></pre>
+<pre><code>## [1]  0.53163162 -0.02943903 -0.16895895 -0.13453825</code></pre>
 </div>
+</div>
+<div id="when-and-how-you-should-write-a-function" class="section level1">
+<h1>When and how you should write a function</h1>
+<div id="when" class="section level3">
+<h3>When?</h3>
+<ul>
+<li>Copy-paste rule of thumb: Whenever you have copied-and-pasted twice, it’s time to write a function</li>
+</ul>
+<pre class="r"><code># Define example vector x
+x &lt;- c(1:10, NA)
+
+# Define rng
+rng &lt;- range(x, na.rm=TRUE)
+
+# Rewrite this snippet to refer to the elements of rng
+(x - min(x, na.rm = TRUE)) /
+  (rng[2] - rng[1])</code></pre>
+<pre><code>##  [1] 0.0000000 0.1111111 0.2222222 0.3333333 0.4444444 0.5555556 0.6666667
+##  [8] 0.7777778 0.8888889 1.0000000        NA</code></pre>
+<pre class="r"><code># Use this in function
+rescale01 &lt;- function(x) {
+  rng &lt;- range(x, na.rm=TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+# Test your function, call rescale01 using the vector x as the argument
+rescale01(x)</code></pre>
+<pre><code>##  [1] 0.0000000 0.1111111 0.2222222 0.3333333 0.4444444 0.5555556 0.6666667
+##  [8] 0.7777778 0.8888889 1.0000000        NA</code></pre>
+</div>
+<div id="how" class="section level3">
+<h3>How?</h3>
+<ol style="list-style-type: decimal">
+<li>Start with a simple problem. It is helpful if you know the answer.</li>
+<li>Get a working snipped of code.</li>
+<li>Rewrite to use temporary variables. Rewrite for clarity. Snippet is the body of the function. Temporary arguments are then the inputs</li>
+<li>Turn into a function</li>
+</ol>
+<pre class="r"><code># Define example vectors x and y
+x &lt;- c( 1, 2, NA, 3, NA)
+y &lt;- c(NA, 3, NA, 3,  4)
+
+# Count how many elements are missing in both x and y
+sum(is.na(x) &amp; is.na(y))</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code># Turn this snippet into a function: both_na()
+both_na &lt;- function(x,y){
+  sum(is.na(x) &amp; is.na(y))
+}</code></pre>
+<p>Note that this function only works in cases where x and y have the same length.</p>
+</div>
+<div id="how-to-write-a-good-function" class="section level3">
+<h3>How to write a good function?</h3>
+<p>Function is</p>
+<ul>
+<li>correct</li>
+<li>understandable</li>
+<li>readable for humans and computers</li>
+<li>correct + understandable = obviously correct</li>
+</ul>
+<p>Naming the function as a verb which describes what it does is a good start. In addition, we should not use function names that are already taken nor use variables which have already a meaning (e.g. <code>T</code> or <code>c</code>).</p>
+<pre class="r"><code># Altered mean_ci function
+mean_ci &lt;- function(x, level = 0.95) {
+  if (length(x) == 0) {
+    warning(&quot;`x` was empty&quot;, 
+    interval &lt;- c(-Inf, Inf))
+    return(interval)
+  } else {
+    se &lt;- sd(x) / sqrt(length(x))
+    alpha &lt;- 1 - level
+    mean(x) + se * qnorm(c(alpha / 2, 1 - alpha / 2))
+  }
+}
+
+mean_ci(numeric(0))</code></pre>
+<pre><code>## Warning in mean_ci(numeric(0)): `x` was empty-InfInf</code></pre>
+<pre><code>## [1] -Inf  Inf</code></pre>
+<pre class="r"><code>mean_ci(x)</code></pre>
+<pre><code>## [1] NA NA</code></pre>
+<pre class="r"><code># replace_missings function
+replace_missings &lt;- function(x, replacement) {
+  x[is.na(x)] &lt;- replacement
+  cat(sum(is.na(x)), replacement, &quot;\n&quot;)
+  x
+}
+
+replace_missings(x, 0)</code></pre>
+<pre><code>## 0 0</code></pre>
+<pre><code>## [1] 1 2 0 3 0</code></pre>
+<pre class="r"><code># A few more tweaks...
+replace_missings &lt;- function(x, replacement) {
+  is_miss &lt;- is.na(x)
+  x[is_miss] &lt;- replacement
+  
+  # Rewrite to use message()
+  message(sum(is_miss), &quot; missings replaced by the value &quot;, replacement)
+  x
+}
+
+replace_missings(x, replacement=10)</code></pre>
+<pre><code>## 2 missings replaced by the value 10</code></pre>
+<pre><code>## [1]  1  2 10  3 10</code></pre>
+</div>
+</div>
+<div id="functional-programming" class="section level1">
+<h1>Functional Programming</h1>
 </div>
 
 

@@ -147,7 +147,108 @@ for (i in seq_along(df)) {
 
 # Print output
 print(output)
+```
+
+# When and how you should write a function
+
+### When?
+
+- Copy-paste rule of thumb: Whenever you have copied-and-pasted twice, it's time to write a function
+
+```{r}
+# Define example vector x
+x <- c(1:10, NA)
+
+# Define rng
+rng <- range(x, na.rm=TRUE)
+
+# Rewrite this snippet to refer to the elements of rng
+(x - min(x, na.rm = TRUE)) /
+  (rng[2] - rng[1])
+
+# Use this in function
+rescale01 <- function(x) {
+  rng <- range(x, na.rm=TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+# Test your function, call rescale01 using the vector x as the argument
+rescale01(x)
+```
+
+### How?
+
+1. Start with a simple problem. It is helpful if you know the answer.
+2. Get a working snipped of code.
+3. Rewrite to use temporary variables. Rewrite for clarity. Snippet is the body of the function. Temporary arguments are then the inputs
+4. Turn into a function
+
+```{r}
+# Define example vectors x and y
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3,  4)
+
+# Count how many elements are missing in both x and y
+sum(is.na(x) & is.na(y))
+
+# Turn this snippet into a function: both_na()
+both_na <- function(x,y){
+  sum(is.na(x) & is.na(y))
+}
+```
+
+Note that this function only works in cases where x and y have the same length. 
+
+### How to write a good function?
+Function is
+
+- correct
+- understandable
+- readable for humans and computers
+- correct + understandable = obviously correct
+
+Naming the function as a verb which describes what it does is a good start. In addition, we should not use function names that are already taken nor use variables which have already a meaning (e.g. `T` or `c`).
+
+```{r}
+# Altered mean_ci function
+mean_ci <- function(x, level = 0.95) {
+  if (length(x) == 0) {
+    warning("`x` was empty", 
+    interval <- c(-Inf, Inf))
+    return(interval)
+  } else {
+    se <- sd(x) / sqrt(length(x))
+    alpha <- 1 - level
+    mean(x) + se * qnorm(c(alpha / 2, 1 - alpha / 2))
+  }
+}
+
+mean_ci(numeric(0))
+mean_ci(x)
+
+# replace_missings function
+replace_missings <- function(x, replacement) {
+  x[is.na(x)] <- replacement
+  cat(sum(is.na(x)), replacement, "\n")
+  x
+}
+
+replace_missings(x, 0)
+
+# A few more tweaks...
+replace_missings <- function(x, replacement) {
+  is_miss <- is.na(x)
+  x[is_miss] <- replacement
+  
+  # Rewrite to use message()
+  message(sum(is_miss), " missings replaced by the value ", replacement)
+  x
+}
+
+replace_missings(x, replacement=10)
 
 ```
+
+# Functional Programming
 
 
