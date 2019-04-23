@@ -12,12 +12,18 @@ knit: (function(input_file, encoding) {
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r, message=F}
+library(purrr)
+```
+
 # Functions in R
 Recall the elements of a function in R: 
 
 - formals
 - body
 - environment
+
+
 
 ```{r}
 # typical function definition
@@ -250,5 +256,181 @@ replace_missings(x, replacement=10)
 ```
 
 # Functional Programming
+
+- Alternatives to the for-loop.
+
+1. Rely on domain knowledge
+2. Use variables
+3. Extract out common code
+
+```{r}
+# Initialize output vector
+output <- numeric(ncol(df))
+
+for (i in seq_along(df)){
+  output[i] <- median(df[[i]])
+}
+
+# turn this code into col_median()
+col_median <- function(df){
+  output <- numeric(ncol(df))
+  for (i in seq_along(df)){
+    output[[i]] <- median(df[[i]])
+  }
+  output
+}
+
+col_median(df)
+
+# change to col_mean()
+col_mean <- function(df) {
+  output <- numeric(ncol(df))
+  for (i in seq_along(df)) {
+    output[[i]] <- mean(df[[i]])
+  }
+  output
+}
+
+# Define col_sd() function
+col_sd <- function(df) {
+  output <- numeric(length(df))
+  for (i in seq_along(df)) {
+    output[[i]] <- sd(df[[i]])
+  }
+  output
+}
+
+```
+
+We just copied and paste the function `col_median` two times! This is a sign that we need to write a function! We start with a simple example first...
+
+```{r}
+# Add a second argument called power
+f <- function(x, power) {
+    # Edit the body to return absolute deviations raised to power
+    (abs(x - mean(x)))^power
+}
+```
+
+Note that functions can be arguments too!
+
+```{r}
+# col_sumamry function
+col_summary <- function(df, fun){
+  output <- numeric(length(df))
+  for (i in seq_along(df)){
+    output[i] <- fun(df[[i]])
+  }
+  output
+}
+
+col_summary(df, fun = median)
+col_summary(df, fun = mean)
+col_summary(df, fun = sd)
+
+# Find the column IQRs using col_summary()
+col_summary(df, fun = IQR)
+
+```
+
+### Introducing purrr
+Passing functions as arguments is a principle that we've already seen with the apply family functions. Now, we want to introduce into a whole family of functions with similar workings. The `map()` functions in the `purrr` package.
+
+Every map functions works the same way:
+```r
+map_dbl(.x, .f, ...)
+```
+
+1. Loop over a vector .x
+2. Do something to each element .f
+3. Return the results
+
+There is one function for each type of vector:
+
+- `map()` returns a list
+- `map_dbl()` returns a double vector
+- `map_lgl()` returns a logical vector
+- `map_int()` returns a integer vector
+- `map_chr()` returns a character vector
+
+Now, let's use `map_dbl()` like we have used our summary function before:
+
+```{r}
+# Use map_dbl() to find column means
+map_dbl(df, mean)
+
+# Use map_dbl() to column medians
+map_dbl(df, median)
+
+# Use map_dbl() to find column standard deviations
+map_dbl(df, sd)
+```
+
+Check the type of an individual output (e.g. of a dataframe) to determine which `map_` funciton is appropriate. 
+
+### Shortcuts for specifying .f
+
+- Using `~`to define an anonymous function on the fly
+
+Data that will be used are a subset of the `mtcars` data.
+
+```{r}
+cyl <- split(mtcars, mtcars$cyl)
+str(cyl)
+head(cyl[[1]])
+```
+
+The objective is to fit a regression to each of the data frames in cyl and quantify the relationshiop between mpg and wt. Focus on slopes
+
+```{r}
+# structure of cyl
+str(cyl)
+
+# first element into four_cyls
+four_cyls <- cyl[[1]]
+
+# linear regression of mpg on wt using four_cyls
+lm(mpg ~ wt, data=four_cyls)
+
+# Rewrite to call an anonymous function
+map(cyl, function(df) lm(mpg ~ wt, df))
+
+# Rewrite to use the formula shortcut instead
+map(cyl, ~lm(mpg ~ wt, data = .))
+
+# Save the result from the previous exercise to the variable models
+models <- map(cyl, ~ lm(mpg ~ wt, data = .))
+
+# Use map and coef to get the coefficients for each model: coefs
+coefs <- map(models, coef)
+
+# Use string shortcut to extract the wt coefficient 
+map(coefs, "wt")
+
+# pull out the second element
+map_dbl(coefs, 2)
+
+```
+Using the pipe operator:
+
+```{r}
+# Define models 
+models <- mtcars %>% 
+  split(mtcars$cyl) %>%
+  map(~ lm(mpg ~ wt, data = .))
+
+# Rewrite to be a single command using pipes 
+summaries <- models %>%
+  map(summary) %>%
+  map_dbl("r.squared")
+```
+
+# Advanced inputs and outputs
+
+
+
+
+
+
 
 

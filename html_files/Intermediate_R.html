@@ -380,6 +380,7 @@ $(document).ready(function () {
 </div>
 
 
+<pre class="r"><code>library(purrr)</code></pre>
 <div id="functions-in-r" class="section level1">
 <h1>Functions in R</h1>
 <p>Recall the elements of a function in R:</p>
@@ -408,7 +409,7 @@ args(add)</code></pre>
 ##     x + y
 ## }</code></pre>
 <pre class="r"><code>environment(add)</code></pre>
-<pre><code>## &lt;environment: 0x0000000013197b58&gt;</code></pre>
+<pre><code>## &lt;environment: 0x00000000163c7c98&gt;</code></pre>
 <ul>
 <li>Last expression evaluated in a function is the return value</li>
 <li><code>return(value)</code> forces the function to stop execution and return value</li>
@@ -493,19 +494,19 @@ df &lt;- data.frame(
 for (i in 1:ncol(df)) {
   print(median(df[[i]]))
 }</code></pre>
-<pre><code>## [1] 0.5316316
-## [1] -0.02943903
-## [1] -0.1689589
-## [1] -0.1345383</code></pre>
+<pre><code>## [1] 0.00528829
+## [1] 0.1563154
+## [1] -0.2384969
+## [1] 0.468259</code></pre>
 <p>Moving forward, we’ll see a safer way to generate the sequence using <code>seq_along()</code> and saving the output instead of printing it.</p>
 <pre class="r"><code># Replace the 1:ncol(df) sequence
 for (i in seq_along(df)) {
   print(median(df[[i]]))
 }</code></pre>
-<pre><code>## [1] 0.5316316
-## [1] -0.02943903
-## [1] -0.1689589
-## [1] -0.1345383</code></pre>
+<pre><code>## [1] 0.00528829
+## [1] 0.1563154
+## [1] -0.2384969
+## [1] 0.468259</code></pre>
 <pre class="r"><code># Create an empty data frame
 empty_df &lt;- data.frame()
 
@@ -525,7 +526,7 @@ for (i in seq_along(df)) {
 
 # Print output
 print(output)</code></pre>
-<pre><code>## [1]  0.53163162 -0.02943903 -0.16895895 -0.13453825</code></pre>
+<pre><code>## [1]  0.00528829  0.15631541 -0.23849688  0.46825905</code></pre>
 </div>
 </div>
 <div id="when-and-how-you-should-write-a-function" class="section level1">
@@ -633,6 +634,306 @@ replace_missings(x, replacement=10)</code></pre>
 </div>
 <div id="functional-programming" class="section level1">
 <h1>Functional Programming</h1>
+<ul>
+<li>Alternatives to the for-loop.</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li>Rely on domain knowledge</li>
+<li>Use variables</li>
+<li>Extract out common code</li>
+</ol>
+<pre class="r"><code># Initialize output vector
+output &lt;- numeric(ncol(df))
+
+for (i in seq_along(df)){
+  output[i] &lt;- median(df[[i]])
+}
+
+# turn this code into col_median()
+col_median &lt;- function(df){
+  output &lt;- numeric(ncol(df))
+  for (i in seq_along(df)){
+    output[[i]] &lt;- median(df[[i]])
+  }
+  output
+}
+
+col_median(df)</code></pre>
+<pre><code>## [1]  0.00528829  0.15631541 -0.23849688  0.46825905</code></pre>
+<pre class="r"><code># change to col_mean()
+col_mean &lt;- function(df) {
+  output &lt;- numeric(ncol(df))
+  for (i in seq_along(df)) {
+    output[[i]] &lt;- mean(df[[i]])
+  }
+  output
+}
+
+# Define col_sd() function
+col_sd &lt;- function(df) {
+  output &lt;- numeric(length(df))
+  for (i in seq_along(df)) {
+    output[[i]] &lt;- sd(df[[i]])
+  }
+  output
+}</code></pre>
+<p>We just copied and paste the function <code>col_median</code> two times! This is a sign that we need to write a function! We start with a simple example first…</p>
+<pre class="r"><code># Add a second argument called power
+f &lt;- function(x, power) {
+    # Edit the body to return absolute deviations raised to power
+    (abs(x - mean(x)))^power
+}</code></pre>
+<p>Note that functions can be arguments too!</p>
+<pre class="r"><code># col_sumamry function
+col_summary &lt;- function(df, fun){
+  output &lt;- numeric(length(df))
+  for (i in seq_along(df)){
+    output[i] &lt;- fun(df[[i]])
+  }
+  output
+}
+
+col_summary(df, fun = median)</code></pre>
+<pre><code>## [1]  0.00528829  0.15631541 -0.23849688  0.46825905</code></pre>
+<pre class="r"><code>col_summary(df, fun = mean)</code></pre>
+<pre><code>## [1]  0.09488221 -0.03659060 -0.21866733  0.34373994</code></pre>
+<pre class="r"><code>col_summary(df, fun = sd)</code></pre>
+<pre><code>## [1] 0.5258045 1.0106148 0.5506145 0.7404630</code></pre>
+<pre class="r"><code># Find the column IQRs using col_summary()
+col_summary(df, fun = IQR)</code></pre>
+<pre><code>## [1] 0.3709100 1.4048668 0.7133115 0.9436848</code></pre>
+<div id="introducing-purrr" class="section level3">
+<h3>Introducing purrr</h3>
+<p>Passing functions as arguments is a principle that we’ve already seen with the apply family functions. Now, we want to introduce into a whole family of functions with similar workings. The <code>map()</code> functions in the <code>purrr</code> package.</p>
+<p>Every map functions works the same way:</p>
+<pre class="r"><code>map_dbl(.x, .f, ...)</code></pre>
+<ol style="list-style-type: decimal">
+<li>Loop over a vector .x</li>
+<li>Do something to each element .f</li>
+<li>Return the results</li>
+</ol>
+<p>There is one function for each type of vector:</p>
+<ul>
+<li><code>map()</code> returns a list</li>
+<li><code>map_dbl()</code> returns a double vector</li>
+<li><code>map_lgl()</code> returns a logical vector</li>
+<li><code>map_int()</code> returns a integer vector</li>
+<li><code>map_chr()</code> returns a character vector</li>
+</ul>
+<p>Now, let’s use <code>map_dbl()</code> like we have used our summary function before:</p>
+<pre class="r"><code># Use map_dbl() to find column means
+map_dbl(df, mean)</code></pre>
+<pre><code>##           a           b           c           d 
+##  0.09488221 -0.03659060 -0.21866733  0.34373994</code></pre>
+<pre class="r"><code># Use map_dbl() to column medians
+map_dbl(df, median)</code></pre>
+<pre><code>##           a           b           c           d 
+##  0.00528829  0.15631541 -0.23849688  0.46825905</code></pre>
+<pre class="r"><code># Use map_dbl() to find column standard deviations
+map_dbl(df, sd)</code></pre>
+<pre><code>##         a         b         c         d 
+## 0.5258045 1.0106148 0.5506145 0.7404630</code></pre>
+<p>Check the type of an individual output (e.g. of a dataframe) to determine which <code>map_</code> funciton is appropriate.</p>
+</div>
+<div id="shortcuts-for-specifying-.f" class="section level3">
+<h3>Shortcuts for specifying .f</h3>
+<ul>
+<li>Using <code>~</code>to define an anonymous function on the fly</li>
+</ul>
+<p>Data that will be used are a subset of the <code>mtcars</code> data.</p>
+<pre class="r"><code>cyl &lt;- split(mtcars, mtcars$cyl)
+str(cyl)</code></pre>
+<pre><code>## List of 3
+##  $ 4:&#39;data.frame&#39;:   11 obs. of  11 variables:
+##   ..$ mpg : num [1:11] 22.8 24.4 22.8 32.4 30.4 33.9 21.5 27.3 26 30.4 ...
+##   ..$ cyl : num [1:11] 4 4 4 4 4 4 4 4 4 4 ...
+##   ..$ disp: num [1:11] 108 146.7 140.8 78.7 75.7 ...
+##   ..$ hp  : num [1:11] 93 62 95 66 52 65 97 66 91 113 ...
+##   ..$ drat: num [1:11] 3.85 3.69 3.92 4.08 4.93 4.22 3.7 4.08 4.43 3.77 ...
+##   ..$ wt  : num [1:11] 2.32 3.19 3.15 2.2 1.61 ...
+##   ..$ qsec: num [1:11] 18.6 20 22.9 19.5 18.5 ...
+##   ..$ vs  : num [1:11] 1 1 1 1 1 1 1 1 0 1 ...
+##   ..$ am  : num [1:11] 1 0 0 1 1 1 0 1 1 1 ...
+##   ..$ gear: num [1:11] 4 4 4 4 4 4 3 4 5 5 ...
+##   ..$ carb: num [1:11] 1 2 2 1 2 1 1 1 2 2 ...
+##  $ 6:&#39;data.frame&#39;:   7 obs. of  11 variables:
+##   ..$ mpg : num [1:7] 21 21 21.4 18.1 19.2 17.8 19.7
+##   ..$ cyl : num [1:7] 6 6 6 6 6 6 6
+##   ..$ disp: num [1:7] 160 160 258 225 168 ...
+##   ..$ hp  : num [1:7] 110 110 110 105 123 123 175
+##   ..$ drat: num [1:7] 3.9 3.9 3.08 2.76 3.92 3.92 3.62
+##   ..$ wt  : num [1:7] 2.62 2.88 3.21 3.46 3.44 ...
+##   ..$ qsec: num [1:7] 16.5 17 19.4 20.2 18.3 ...
+##   ..$ vs  : num [1:7] 0 0 1 1 1 1 0
+##   ..$ am  : num [1:7] 1 1 0 0 0 0 1
+##   ..$ gear: num [1:7] 4 4 3 3 4 4 5
+##   ..$ carb: num [1:7] 4 4 1 1 4 4 6
+##  $ 8:&#39;data.frame&#39;:   14 obs. of  11 variables:
+##   ..$ mpg : num [1:14] 18.7 14.3 16.4 17.3 15.2 10.4 10.4 14.7 15.5 15.2 ...
+##   ..$ cyl : num [1:14] 8 8 8 8 8 8 8 8 8 8 ...
+##   ..$ disp: num [1:14] 360 360 276 276 276 ...
+##   ..$ hp  : num [1:14] 175 245 180 180 180 205 215 230 150 150 ...
+##   ..$ drat: num [1:14] 3.15 3.21 3.07 3.07 3.07 2.93 3 3.23 2.76 3.15 ...
+##   ..$ wt  : num [1:14] 3.44 3.57 4.07 3.73 3.78 ...
+##   ..$ qsec: num [1:14] 17 15.8 17.4 17.6 18 ...
+##   ..$ vs  : num [1:14] 0 0 0 0 0 0 0 0 0 0 ...
+##   ..$ am  : num [1:14] 0 0 0 0 0 0 0 0 0 0 ...
+##   ..$ gear: num [1:14] 3 3 3 3 3 3 3 3 3 3 ...
+##   ..$ carb: num [1:14] 2 4 3 3 3 4 4 4 2 2 ...</code></pre>
+<pre class="r"><code>head(cyl[[1]])</code></pre>
+<pre><code>##                 mpg cyl  disp hp drat    wt  qsec vs am gear carb
+## Datsun 710     22.8   4 108.0 93 3.85 2.320 18.61  1  1    4    1
+## Merc 240D      24.4   4 146.7 62 3.69 3.190 20.00  1  0    4    2
+## Merc 230       22.8   4 140.8 95 3.92 3.150 22.90  1  0    4    2
+## Fiat 128       32.4   4  78.7 66 4.08 2.200 19.47  1  1    4    1
+## Honda Civic    30.4   4  75.7 52 4.93 1.615 18.52  1  1    4    2
+## Toyota Corolla 33.9   4  71.1 65 4.22 1.835 19.90  1  1    4    1</code></pre>
+<p>The objective is to fit a regression to each of the data frames in cyl and quantify the relationshiop between mpg and wt. Focus on slopes</p>
+<pre class="r"><code># structure of cyl
+str(cyl)</code></pre>
+<pre><code>## List of 3
+##  $ 4:&#39;data.frame&#39;:   11 obs. of  11 variables:
+##   ..$ mpg : num [1:11] 22.8 24.4 22.8 32.4 30.4 33.9 21.5 27.3 26 30.4 ...
+##   ..$ cyl : num [1:11] 4 4 4 4 4 4 4 4 4 4 ...
+##   ..$ disp: num [1:11] 108 146.7 140.8 78.7 75.7 ...
+##   ..$ hp  : num [1:11] 93 62 95 66 52 65 97 66 91 113 ...
+##   ..$ drat: num [1:11] 3.85 3.69 3.92 4.08 4.93 4.22 3.7 4.08 4.43 3.77 ...
+##   ..$ wt  : num [1:11] 2.32 3.19 3.15 2.2 1.61 ...
+##   ..$ qsec: num [1:11] 18.6 20 22.9 19.5 18.5 ...
+##   ..$ vs  : num [1:11] 1 1 1 1 1 1 1 1 0 1 ...
+##   ..$ am  : num [1:11] 1 0 0 1 1 1 0 1 1 1 ...
+##   ..$ gear: num [1:11] 4 4 4 4 4 4 3 4 5 5 ...
+##   ..$ carb: num [1:11] 1 2 2 1 2 1 1 1 2 2 ...
+##  $ 6:&#39;data.frame&#39;:   7 obs. of  11 variables:
+##   ..$ mpg : num [1:7] 21 21 21.4 18.1 19.2 17.8 19.7
+##   ..$ cyl : num [1:7] 6 6 6 6 6 6 6
+##   ..$ disp: num [1:7] 160 160 258 225 168 ...
+##   ..$ hp  : num [1:7] 110 110 110 105 123 123 175
+##   ..$ drat: num [1:7] 3.9 3.9 3.08 2.76 3.92 3.92 3.62
+##   ..$ wt  : num [1:7] 2.62 2.88 3.21 3.46 3.44 ...
+##   ..$ qsec: num [1:7] 16.5 17 19.4 20.2 18.3 ...
+##   ..$ vs  : num [1:7] 0 0 1 1 1 1 0
+##   ..$ am  : num [1:7] 1 1 0 0 0 0 1
+##   ..$ gear: num [1:7] 4 4 3 3 4 4 5
+##   ..$ carb: num [1:7] 4 4 1 1 4 4 6
+##  $ 8:&#39;data.frame&#39;:   14 obs. of  11 variables:
+##   ..$ mpg : num [1:14] 18.7 14.3 16.4 17.3 15.2 10.4 10.4 14.7 15.5 15.2 ...
+##   ..$ cyl : num [1:14] 8 8 8 8 8 8 8 8 8 8 ...
+##   ..$ disp: num [1:14] 360 360 276 276 276 ...
+##   ..$ hp  : num [1:14] 175 245 180 180 180 205 215 230 150 150 ...
+##   ..$ drat: num [1:14] 3.15 3.21 3.07 3.07 3.07 2.93 3 3.23 2.76 3.15 ...
+##   ..$ wt  : num [1:14] 3.44 3.57 4.07 3.73 3.78 ...
+##   ..$ qsec: num [1:14] 17 15.8 17.4 17.6 18 ...
+##   ..$ vs  : num [1:14] 0 0 0 0 0 0 0 0 0 0 ...
+##   ..$ am  : num [1:14] 0 0 0 0 0 0 0 0 0 0 ...
+##   ..$ gear: num [1:14] 3 3 3 3 3 3 3 3 3 3 ...
+##   ..$ carb: num [1:14] 2 4 3 3 3 4 4 4 2 2 ...</code></pre>
+<pre class="r"><code># first element into four_cyls
+four_cyls &lt;- cyl[[1]]
+
+# linear regression of mpg on wt using four_cyls
+lm(mpg ~ wt, data=four_cyls)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = mpg ~ wt, data = four_cyls)
+## 
+## Coefficients:
+## (Intercept)           wt  
+##      39.571       -5.647</code></pre>
+<pre class="r"><code># Rewrite to call an anonymous function
+map(cyl, function(df) lm(mpg ~ wt, df))</code></pre>
+<pre><code>## $`4`
+## 
+## Call:
+## lm(formula = mpg ~ wt, data = df)
+## 
+## Coefficients:
+## (Intercept)           wt  
+##      39.571       -5.647  
+## 
+## 
+## $`6`
+## 
+## Call:
+## lm(formula = mpg ~ wt, data = df)
+## 
+## Coefficients:
+## (Intercept)           wt  
+##       28.41        -2.78  
+## 
+## 
+## $`8`
+## 
+## Call:
+## lm(formula = mpg ~ wt, data = df)
+## 
+## Coefficients:
+## (Intercept)           wt  
+##      23.868       -2.192</code></pre>
+<pre class="r"><code># Rewrite to use the formula shortcut instead
+map(cyl, ~lm(mpg ~ wt, data = .))</code></pre>
+<pre><code>## $`4`
+## 
+## Call:
+## lm(formula = mpg ~ wt, data = .)
+## 
+## Coefficients:
+## (Intercept)           wt  
+##      39.571       -5.647  
+## 
+## 
+## $`6`
+## 
+## Call:
+## lm(formula = mpg ~ wt, data = .)
+## 
+## Coefficients:
+## (Intercept)           wt  
+##       28.41        -2.78  
+## 
+## 
+## $`8`
+## 
+## Call:
+## lm(formula = mpg ~ wt, data = .)
+## 
+## Coefficients:
+## (Intercept)           wt  
+##      23.868       -2.192</code></pre>
+<pre class="r"><code># Save the result from the previous exercise to the variable models
+models &lt;- map(cyl, ~ lm(mpg ~ wt, data = .))
+
+# Use map and coef to get the coefficients for each model: coefs
+coefs &lt;- map(models, coef)
+
+# Use string shortcut to extract the wt coefficient 
+map(coefs, &quot;wt&quot;)</code></pre>
+<pre><code>## $`4`
+## [1] -5.647025
+## 
+## $`6`
+## [1] -2.780106
+## 
+## $`8`
+## [1] -2.192438</code></pre>
+<pre class="r"><code># pull out the second element
+map_dbl(coefs, 2)</code></pre>
+<pre><code>##         4         6         8 
+## -5.647025 -2.780106 -2.192438</code></pre>
+<p>Using the pipe operator:</p>
+<pre class="r"><code># Define models 
+models &lt;- mtcars %&gt;% 
+  split(mtcars$cyl) %&gt;%
+  map(~ lm(mpg ~ wt, data = .))
+
+# Rewrite to be a single command using pipes 
+summaries &lt;- models %&gt;%
+  map(summary) %&gt;%
+  map_dbl(&quot;r.squared&quot;)</code></pre>
+</div>
+</div>
+<div id="advanced-inputs-and-outputs" class="section level1">
+<h1>Advanced inputs and outputs</h1>
 </div>
 
 
