@@ -409,7 +409,7 @@ args(add)</code></pre>
 ##     x + y
 ## }</code></pre>
 <pre class="r"><code>environment(add)</code></pre>
-<pre><code>## &lt;environment: 0x00000000163c7c98&gt;</code></pre>
+<pre><code>## &lt;environment: 0x0000000013195ce8&gt;</code></pre>
 <ul>
 <li>Last expression evaluated in a function is the return value</li>
 <li><code>return(value)</code> forces the function to stop execution and return value</li>
@@ -494,19 +494,19 @@ df &lt;- data.frame(
 for (i in 1:ncol(df)) {
   print(median(df[[i]]))
 }</code></pre>
-<pre><code>## [1] 0.00528829
-## [1] 0.1563154
-## [1] -0.2384969
-## [1] 0.468259</code></pre>
+<pre><code>## [1] -0.08201508
+## [1] -1.079086
+## [1] -0.1360707
+## [1] 0.5316018</code></pre>
 <p>Moving forward, we’ll see a safer way to generate the sequence using <code>seq_along()</code> and saving the output instead of printing it.</p>
 <pre class="r"><code># Replace the 1:ncol(df) sequence
 for (i in seq_along(df)) {
   print(median(df[[i]]))
 }</code></pre>
-<pre><code>## [1] 0.00528829
-## [1] 0.1563154
-## [1] -0.2384969
-## [1] 0.468259</code></pre>
+<pre><code>## [1] -0.08201508
+## [1] -1.079086
+## [1] -0.1360707
+## [1] 0.5316018</code></pre>
 <pre class="r"><code># Create an empty data frame
 empty_df &lt;- data.frame()
 
@@ -526,7 +526,7 @@ for (i in seq_along(df)) {
 
 # Print output
 print(output)</code></pre>
-<pre><code>## [1]  0.00528829  0.15631541 -0.23849688  0.46825905</code></pre>
+<pre><code>## [1] -0.08201508 -1.07908583 -0.13607073  0.53160183</code></pre>
 </div>
 </div>
 <div id="when-and-how-you-should-write-a-function" class="section level1">
@@ -659,7 +659,7 @@ col_median &lt;- function(df){
 }
 
 col_median(df)</code></pre>
-<pre><code>## [1]  0.00528829  0.15631541 -0.23849688  0.46825905</code></pre>
+<pre><code>## [1] -0.08201508 -1.07908583 -0.13607073  0.53160183</code></pre>
 <pre class="r"><code># change to col_mean()
 col_mean &lt;- function(df) {
   output &lt;- numeric(ncol(df))
@@ -694,14 +694,14 @@ col_summary &lt;- function(df, fun){
 }
 
 col_summary(df, fun = median)</code></pre>
-<pre><code>## [1]  0.00528829  0.15631541 -0.23849688  0.46825905</code></pre>
+<pre><code>## [1] -0.08201508 -1.07908583 -0.13607073  0.53160183</code></pre>
 <pre class="r"><code>col_summary(df, fun = mean)</code></pre>
-<pre><code>## [1]  0.09488221 -0.03659060 -0.21866733  0.34373994</code></pre>
+<pre><code>## [1]  0.02706810 -0.80191141 -0.04809258  0.25833969</code></pre>
 <pre class="r"><code>col_summary(df, fun = sd)</code></pre>
-<pre><code>## [1] 0.5258045 1.0106148 0.5506145 0.7404630</code></pre>
+<pre><code>## [1] 1.1539405 1.0079331 0.8709869 0.9877556</code></pre>
 <pre class="r"><code># Find the column IQRs using col_summary()
 col_summary(df, fun = IQR)</code></pre>
-<pre><code>## [1] 0.3709100 1.4048668 0.7133115 0.9436848</code></pre>
+<pre><code>## [1] 1.922627 1.440012 0.413988 1.211075</code></pre>
 <div id="introducing-purrr" class="section level3">
 <h3>Introducing purrr</h3>
 <p>Passing functions as arguments is a principle that we’ve already seen with the apply family functions. Now, we want to introduce into a whole family of functions with similar workings. The <code>map()</code> functions in the <code>purrr</code> package.</p>
@@ -724,15 +724,15 @@ col_summary(df, fun = IQR)</code></pre>
 <pre class="r"><code># Use map_dbl() to find column means
 map_dbl(df, mean)</code></pre>
 <pre><code>##           a           b           c           d 
-##  0.09488221 -0.03659060 -0.21866733  0.34373994</code></pre>
+##  0.02706810 -0.80191141 -0.04809258  0.25833969</code></pre>
 <pre class="r"><code># Use map_dbl() to column medians
 map_dbl(df, median)</code></pre>
 <pre><code>##           a           b           c           d 
-##  0.00528829  0.15631541 -0.23849688  0.46825905</code></pre>
+## -0.08201508 -1.07908583 -0.13607073  0.53160183</code></pre>
 <pre class="r"><code># Use map_dbl() to find column standard deviations
 map_dbl(df, sd)</code></pre>
 <pre><code>##         a         b         c         d 
-## 0.5258045 1.0106148 0.5506145 0.7404630</code></pre>
+## 1.1539405 1.0079331 0.8709869 0.9877556</code></pre>
 <p>Check the type of an individual output (e.g. of a dataframe) to determine which <code>map_</code> funciton is appropriate.</p>
 </div>
 <div id="shortcuts-for-specifying-.f" class="section level3">
@@ -934,6 +934,162 @@ summaries &lt;- models %&gt;%
 </div>
 <div id="advanced-inputs-and-outputs" class="section level1">
 <h1>Advanced inputs and outputs</h1>
+<ul>
+<li>map functions fail hard if they fail</li>
+<li>use <code>safely(log)</code> for example</li>
+</ul>
+<p>Other adverbs for unusual output in <code>purrr</code>: - <code>safely()</code> - <code>possibly()</code> - <code>quietly()</code></p>
+<pre class="r"><code># safe_log
+safe_log &lt;- safely(log)
+safe_log(-1)</code></pre>
+<pre><code>## Warning in .f(...): NaNs produced</code></pre>
+<pre><code>## $result
+## [1] NaN
+## 
+## $error
+## NULL</code></pre>
+<pre class="r"><code>safe_log(&quot;a&quot;)</code></pre>
+<pre><code>## $result
+## NULL
+## 
+## $error
+## &lt;simpleError in .Primitive(&quot;log&quot;)(x, base): non-numeric argument to mathematical function&gt;</code></pre>
+<pre class="r"><code># Create safe_readLines()
+safe_readLines &lt;- safely(readLines)
+
+# Call on &quot;http://example.org&quot;
+example_lines &lt;- safe_readLines(&quot;http://example.org&quot;)
+example_lines</code></pre>
+<pre><code>## $result
+##  [1] &quot;&lt;!doctype html&gt;&quot;                                                                                      
+##  [2] &quot;&lt;html&gt;&quot;                                                                                               
+##  [3] &quot;&lt;head&gt;&quot;                                                                                               
+##  [4] &quot;    &lt;title&gt;Example Domain&lt;/title&gt;&quot;                                                                    
+##  [5] &quot;&quot;                                                                                                     
+##  [6] &quot;    &lt;meta charset=\&quot;utf-8\&quot; /&gt;&quot;                                                                       
+##  [7] &quot;    &lt;meta http-equiv=\&quot;Content-type\&quot; content=\&quot;text/html; charset=utf-8\&quot; /&gt;&quot;                        
+##  [8] &quot;    &lt;meta name=\&quot;viewport\&quot; content=\&quot;width=device-width, initial-scale=1\&quot; /&gt;&quot;                       
+##  [9] &quot;    &lt;style type=\&quot;text/css\&quot;&gt;&quot;                                                                        
+## [10] &quot;    body {&quot;                                                                                           
+## [11] &quot;        background-color: #f0f0f2;&quot;                                                                   
+## [12] &quot;        margin: 0;&quot;                                                                                   
+## [13] &quot;        padding: 0;&quot;                                                                                  
+## [14] &quot;        font-family: \&quot;Open Sans\&quot;, \&quot;Helvetica Neue\&quot;, Helvetica, Arial, sans-serif;&quot;                
+## [15] &quot;        &quot;                                                                                             
+## [16] &quot;    }&quot;                                                                                                
+## [17] &quot;    div {&quot;                                                                                            
+## [18] &quot;        width: 600px;&quot;                                                                                
+## [19] &quot;        margin: 5em auto;&quot;                                                                            
+## [20] &quot;        padding: 50px;&quot;                                                                               
+## [21] &quot;        background-color: #fff;&quot;                                                                      
+## [22] &quot;        border-radius: 1em;&quot;                                                                          
+## [23] &quot;    }&quot;                                                                                                
+## [24] &quot;    a:link, a:visited {&quot;                                                                              
+## [25] &quot;        color: #38488f;&quot;                                                                              
+## [26] &quot;        text-decoration: none;&quot;                                                                       
+## [27] &quot;    }&quot;                                                                                                
+## [28] &quot;    @media (max-width: 700px) {&quot;                                                                      
+## [29] &quot;        body {&quot;                                                                                       
+## [30] &quot;            background-color: #fff;&quot;                                                                  
+## [31] &quot;        }&quot;                                                                                            
+## [32] &quot;        div {&quot;                                                                                        
+## [33] &quot;            width: auto;&quot;                                                                             
+## [34] &quot;            margin: 0 auto;&quot;                                                                          
+## [35] &quot;            border-radius: 0;&quot;                                                                        
+## [36] &quot;            padding: 1em;&quot;                                                                            
+## [37] &quot;        }&quot;                                                                                            
+## [38] &quot;    }&quot;                                                                                                
+## [39] &quot;    &lt;/style&gt;    &quot;                                                                                     
+## [40] &quot;&lt;/head&gt;&quot;                                                                                              
+## [41] &quot;&quot;                                                                                                     
+## [42] &quot;&lt;body&gt;&quot;                                                                                               
+## [43] &quot;&lt;div&gt;&quot;                                                                                                
+## [44] &quot;    &lt;h1&gt;Example Domain&lt;/h1&gt;&quot;                                                                          
+## [45] &quot;    &lt;p&gt;This domain is established to be used for illustrative examples in documents. You may use this&quot;
+## [46] &quot;    domain in examples without prior coordination or asking for permission.&lt;/p&gt;&quot;                      
+## [47] &quot;    &lt;p&gt;&lt;a href=\&quot;http://www.iana.org/domains/example\&quot;&gt;More information...&lt;/a&gt;&lt;/p&gt;&quot;                   
+## [48] &quot;&lt;/div&gt;&quot;                                                                                               
+## [49] &quot;&lt;/body&gt;&quot;                                                                                              
+## [50] &quot;&lt;/html&gt;&quot;                                                                                              
+## 
+## $error
+## NULL</code></pre>
+<pre class="r"><code># Call on &quot;http://asdfasdasdkfjlda&quot;
+nonsense_lines &lt;- safe_readLines(&quot;http://asdfasdasdkfjlda&quot;)</code></pre>
+<pre><code>## Warning in file(con, &quot;r&quot;): InternetOpenUrl failed: &#39;Der Servername oder die
+## Serveradresse konnte nicht verarbeitet werden.&#39;</code></pre>
+<pre class="r"><code>nonsense_lines</code></pre>
+<pre><code>## $result
+## NULL
+## 
+## $error
+## &lt;simpleError in file(con, &quot;r&quot;): cannot open the connection&gt;</code></pre>
+<pre class="r"><code>urls &lt;- list(
+  example = &quot;http://example.org&quot;,
+  rproj = &quot;http://www.r-project.org&quot;,
+  asdf = &quot;http://asdfasdasdkfjlda&quot;
+)
+
+# Define safe_readLines()
+safe_readLines &lt;- safely(readLines)
+
+# Use the safe_readLines() function with map(): html
+html &lt;- map(urls, safe_readLines)</code></pre>
+<pre><code>## Warning in file(con, &quot;r&quot;): InternetOpenUrl failed: &#39;Der Servername oder die
+## Serveradresse konnte nicht verarbeitet werden.&#39;</code></pre>
+<pre class="r"><code># Call str() on html
+str(html)</code></pre>
+<pre><code>## List of 3
+##  $ example:List of 2
+##   ..$ result: chr [1:50] &quot;&lt;!doctype html&gt;&quot; &quot;&lt;html&gt;&quot; &quot;&lt;head&gt;&quot; &quot;    &lt;title&gt;Example Domain&lt;/title&gt;&quot; ...
+##   ..$ error : NULL
+##  $ rproj  :List of 2
+##   ..$ result: chr [1:124] &quot;&lt;!DOCTYPE html&gt;&quot; &quot;&lt;html lang=\&quot;en\&quot;&gt;&quot; &quot;  &lt;head&gt;&quot; &quot;    &lt;meta charset=\&quot;utf-8\&quot;&gt;&quot; ...
+##   ..$ error : NULL
+##  $ asdf   :List of 2
+##   ..$ result: NULL
+##   ..$ error :List of 2
+##   .. ..$ message: chr &quot;cannot open the connection&quot;
+##   .. ..$ call   : language file(con, &quot;r&quot;)
+##   .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;simpleError&quot; &quot;error&quot; &quot;condition&quot;</code></pre>
+<pre class="r"><code># Extract the result from one of the successful elements
+head(html[[&quot;example&quot;]]$result)</code></pre>
+<pre><code>## [1] &quot;&lt;!doctype html&gt;&quot;                   &quot;&lt;html&gt;&quot;                           
+## [3] &quot;&lt;head&gt;&quot;                            &quot;    &lt;title&gt;Example Domain&lt;/title&gt;&quot;
+## [5] &quot;&quot;                                  &quot;    &lt;meta charset=\&quot;utf-8\&quot; /&gt;&quot;</code></pre>
+<pre class="r"><code># Extract the error from the element that was unsuccessful
+html[[&quot;asdf&quot;]][[&quot;error&quot;]]</code></pre>
+<pre><code>## &lt;simpleError in file(con, &quot;r&quot;): cannot open the connection&gt;</code></pre>
+<pre class="r"><code># Examine the structure of transpose(html)
+str(transpose(html))</code></pre>
+<pre><code>## List of 2
+##  $ result:List of 3
+##   ..$ example: chr [1:50] &quot;&lt;!doctype html&gt;&quot; &quot;&lt;html&gt;&quot; &quot;&lt;head&gt;&quot; &quot;    &lt;title&gt;Example Domain&lt;/title&gt;&quot; ...
+##   ..$ rproj  : chr [1:124] &quot;&lt;!DOCTYPE html&gt;&quot; &quot;&lt;html lang=\&quot;en\&quot;&gt;&quot; &quot;  &lt;head&gt;&quot; &quot;    &lt;meta charset=\&quot;utf-8\&quot;&gt;&quot; ...
+##   ..$ asdf   : NULL
+##  $ error :List of 3
+##   ..$ example: NULL
+##   ..$ rproj  : NULL
+##   ..$ asdf   :List of 2
+##   .. ..$ message: chr &quot;cannot open the connection&quot;
+##   .. ..$ call   : language file(con, &quot;r&quot;)
+##   .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;simpleError&quot; &quot;error&quot; &quot;condition&quot;</code></pre>
+<pre class="r"><code># Extract the results: res
+res &lt;- transpose(html)[[&quot;result&quot;]]
+
+# Extract the errors: errs
+errs &lt;- transpose(html)[[&quot;error&quot;]]
+
+# Create a logical vector is_ok
+is_ok &lt;- map_lgl(errs, is_null)
+
+# Extract the successful results
+#head(res[is_ok])
+
+# Find the URLs that were unsuccessful
+head(urls[!is_ok])</code></pre>
+<pre><code>## $asdf
+## [1] &quot;http://asdfasdasdkfjlda&quot;</code></pre>
 </div>
 
 

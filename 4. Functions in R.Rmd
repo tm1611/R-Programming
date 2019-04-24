@@ -427,9 +427,77 @@ summaries <- models %>%
 
 # Advanced inputs and outputs
 
+- map functions fail hard if they fail
+- use `safely(log)` for example 
+
+Other adverbs for unusual output in `purrr`:
+- `safely()`
+- `possibly()`
+- `quietly()`
+
+```{r}
+# safe_log
+safe_log <- safely(log)
+safe_log(-1)
+safe_log("a")
+
+# Create safe_readLines()
+safe_readLines <- safely(readLines)
+
+# Call on "http://example.org"
+example_lines <- safe_readLines("http://example.org")
+example_lines
+
+# Call on "http://asdfasdasdkfjlda"
+nonsense_lines <- safe_readLines("http://asdfasdasdkfjlda")
+nonsense_lines
+``` 
 
 
+```{r}
+urls <- list(
+  example = "http://example.org",
+  rproj = "http://www.r-project.org",
+  asdf = "http://asdfasdasdkfjlda"
+)
 
+# Define safe_readLines()
+safe_readLines <- safely(readLines)
+
+# Use the safe_readLines() function with map(): html
+html <- map(urls, safe_readLines)
+
+# Call str() on html
+str(html)
+
+# Extract the result from one of the successful elements
+head(html[["example"]]$result)
+
+# Extract the error from the element that was unsuccessful
+html[["asdf"]][["error"]]
+
+```
+
+```{r}
+# Examine the structure of transpose(html)
+str(transpose(html))
+
+# Extract the results: res
+res <- transpose(html)[["result"]]
+
+# Extract the errors: errs
+errs <- transpose(html)[["error"]]
+
+# Create a logical vector is_ok
+is_ok <- map_lgl(errs, is_null)
+
+# Extract the successful results
+#head(res[is_ok])
+
+# Find the URLs that were unsuccessful
+head(urls[!is_ok])
+
+```
 
 
 
