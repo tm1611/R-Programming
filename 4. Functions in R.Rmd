@@ -495,10 +495,175 @@ is_ok <- map_lgl(errs, is_null)
 #head(res[is_ok])
 
 # Find the URLs that were unsuccessful
-head(urls[!is_ok])
+urls[!is_ok]
+```
+
+### Mapping over multiple args
+
+```{r}
+# rnorm(5)
+# rnorm(10)
+# rnorm(20)
+
+# using map:
+map(list(5,10,20), rnorm)
+
+# rnorm(5, mean = 1)
+# rnorm(10, mean = 5)
+# rnorm(20, mean = 10)
+
+# using map2
+str(map2(list(5, 10, 20), list(1, 5, 10), rnorm))
+```
+
+Even more arguments? Use `pmap()` function to iterate over many arguments. 
+
+```{r}
+my_list <- pmap(list(n =    list(5, 10, 20),
+          mean = list(1, 5, 10),
+          sd =   list(0.1, 0.5, 0.1)), rnorm)
+
+str(my_list)
+```
+
+Use `invoke_map()` function to iterate over functions (i.e. different distribution functions here). 
+
+```{r}
+my_list <- invoke_map(list(rnorm, runif, rexp), n = 5)
+str(my_list)
+
+# Define list of functions
+funs <- list("rnorm", "runif", "rexp")
+
+# Parameter list for rnorm()
+rnorm_params <- list(mean = 10)
+
+# Add a min element with value 0 and max element with value 5
+runif_params <- list(min = 0, max = 5)
+
+# Add a rate element with value 5
+rexp_params <- list(rate = 5)
+
+# Define params for each function
+params <- list(
+  rnorm_params,
+  runif_params,
+  rexp_params
+)
+
+# Call invoke_map() on funs supplying params and setting n to 5
+invoke_map(funs, params, n = 5)
 
 ```
 
+In summary of mapping over many arguments:
+- `map2()` - iterate over two arguments
+- `pmap()` - iterate over functions and arguments
+- `invoke_map()` - iterate over functions and arguments 
+
+
+### Maps with side effects
+Side effects: 
+
+- Describe things that happen beyond the results of a function
+- Examples include: printing output, plotting and saving files to disk
+
+```{r}
+x <- list(1, "a", 3)
+
+# print side effect
+x %>% 
+  walk(print)
+
+library(ggplot2)
+plots <- cyl %>% 
+  map(~ ggplot(., aes(mpg, wt)) + geom_point())
+
+paths <- paste0(names(plots), ".pdf")
+
+# following code saves as pdf 
+#walk2(paths, plots, ggsave)
+
+# walk() in a pipeline
+lengths <- x %>% 
+  walk(print) %>% 
+  map_dbl(length)
+
+lengths
+```
+
+- Using `walk` and `invoke_map` altogether
+
+```{r}
+# Define list of functions
+funs <- list(Normal = "rnorm", Uniform = "runif", Exp = "rexp")
+
+# Define params
+params <- list(
+  Normal = list(mean = 10),
+  Uniform = list(min = 0, max = 5),
+  Exp = list(rate = 5)
+)
+
+# Assign the simulated samples to sims
+sims <- invoke_map(funs, params, n = 50)
+
+# Use walk() to make a histogram of each element in sims
+walk(sims, hist)
+```
+
+
+- Use walk2() to vary two arguments
+
+```{r}
+# Reasonable breaks for each sample
+breaks_list <- list(
+  Normal = seq(6, 16, 0.5),
+  Uniform = seq(0,5, 0.25),
+  Exp = seq(0, 1.5, 0.1)
+)
+
+# Use walk2() to make histograms with the right breaks
+walk2(sims, breaks_list, hist)
+```
+
+
+```{r}
+# find_breaks()
+find_breaks <- function(x){
+  rng <- range(x, na.rm = TRUE)
+  seq(rng[1], rng[2], length.out = 30)
+}
+
+# Call find_breaks() on sims[[1]]
+find_breaks(sims[[1]])
+
+# Use map() to iterate find_breaks() over sims
+nice_breaks <- map(sims, find_breaks)
+
+# Use nice_breaks as the second argument to walk2()
+walk2(sims, nice_breaks, hist)
+
+# Increase sample size to 1000
+sims <- invoke_map(funs, params, n = 1000)
+
+# Compute nice_breaks (don't change this)
+nice_breaks <- map(sims, find_breaks)
+
+# Create a vector nice_titles
+nice_titles <- c("Normal(10, 1)", "Uniform(0, 5)", "Exp(5)")
+
+# Use pwalk() instead of walk2()
+pwalk(.l = list(x=sims, breaks = nice_breaks, main=nice_titles), .f=hist, xlab= "")
+
+# Pipe this along to map(), using summary() as .f
+sims %>%
+  walk(hist) %>%
+  map(summary)
+
+```
+
+# Robust Functions
 
 
 
