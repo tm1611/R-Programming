@@ -664,6 +664,95 @@ sims %>%
 ```
 
 # Robust Functions
+Easy to use and reliable functions.
+
+Three main problems:
+
+- Type-unstable functions
+- Non-standard evaluation
+- Hidden arguments 
+
+Throwing errors:
+
+- `stopifnot(is.character(x))`: Check if right arguments
+- Using `stop()` with if condition 
+
+```r
+if (condition) {
+  stop("Error", call. = FALSE)
+}
+
+# example
+if (!is.character(x)){
+  stop("`x` should be a character vector", call. = FALSE)
+}
+```
+
+```{r, eval = FALSE}
+# Define troublesome x and y
+x <- c(NA, NA, NA)
+y <- c( 1, NA, NA, NA)
+
+both_na <- function(x, y) {
+  # Add stopifnot() to check length of x and y
+  stopifnot( length(x) == length(y) )
+  sum(is.na(x) & is.na(y))
+}
+
+# Call both_na() on x and y
+both_na(x, y)
+```
+
+Using `stop()` instead of `stopifnot()` allows to specify a more informative error message.
+
+```{r, eval = FALSE}
+# alternative both_na function
+both_na <- function(x, y) {
+  # Replace condition with logical
+  if ( !(length(x) == length(y)) ) {
+    # Replace "Error" with better message
+    stop("x and y must have the same length", call. = FALSE)
+  }  
+  
+  sum(is.na(x) & is.na(y))
+}
+
+# Call both_na() 
+both_na(x, y)
+```
+
+### Unstable types
+
+- type-inconsistent: type of the return object depends on the input
+- surprises occur when you've used a type-inconsistent function inside your own function
+- sometimes lead to hard to decipher error messages
+
+```{r}
+# example
+df[1,]
+```
+
+In general, this should return the first row of the dataframe. But if `df` has only one col, then it returns a vector. Hence, sometimes it returns a `data.frame` and sometimes a `vector`.
+
+Problems occur, when such a behavior is not detected (i.e. within functions).
+
+Note that `[` is a common source of surprises.
+
+Two common solutions for [:
+
+- Use `drop = FALSE:df[x, , drop = FALSE]`
+- subset the data frame like a list: `df[x]`
+
+Own functions should be written type-stable to avoid such problems. 
+
+- Be aware of type-unstable functions (`[, sapply,...`). 
+- Avoid using type-inconsistent functions inside your own functions. 
+- Building a vocabulary of type-consistent functions may help.
+
+
+
+
+
 
 
 
