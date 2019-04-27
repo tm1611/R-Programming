@@ -749,6 +749,190 @@ Own functions should be written type-stable to avoid such problems.
 - Avoid using type-inconsistent functions inside your own functions. 
 - Building a vocabulary of type-consistent functions may help.
 
+```{r}
+df <- data.frame(
+  a = 1L,
+  b = 1.5,
+  y = Sys.time(),
+  z = ordered(1)
+)
+
+A <- sapply(df[1:4], class) 
+B <- sapply(df[3:4], class)
+```
+
+In this case, A is a list and B a matrix. We will now substitute sapply with `map()` which always returns a list or ...
+
+```{r}
+# sapply calls
+A <- sapply(df[1:4], class) 
+B <- sapply(df[3:4], class)
+C <- sapply(df[1:2], class) 
+
+# Demonstrate type inconsistency
+str(A)
+str(B)
+str(C)
+
+# Use map() to define X, Y and Z
+X <- map(df[1:4], class)
+Y <- map(df[3:4], class)
+Z <- map(df[1:2], class)
+
+# Use str() to check type consistency
+str(X)
+str(Y)
+str(Z)
+
+# type-consistent solution
+col_classes <- function(df) {
+  class_list <- map(df, class)
+  map_chr(class_list, 1)
+}
+
+# Check that our new function is type consistent
+df %>% col_classes() %>% str()
+df[3:4] %>% col_classes() %>% str()
+df[1:2] %>% col_classes() %>% str()
+
+```
+
+Alternatively, fail early if something goes wrong
+
+```{r, eval=FALSE}
+col_classes <- function(df) {
+  class_list <- map(df, class)
+  # Add a check that no element of class_list has length > 1
+  if ( any(map_dbl(class_list, length) > 1) ) {
+    stop("Some columns have more than one class", call. = FALSE)
+  }
+  # Use flatten_chr() to return a character vector
+  flatten_chr(class_list)
+}
+
+# Check that our new function is type consistent
+df %>% col_classes() %>% str()
+df[3:4] %>% col_classes() %>% str()
+df[1:2] %>% col_classes() %>% str()
+```
+
+### Non-standard evaluation
+Source of surprises are functions which don't use the usual lookup rules for variables. Examples are 
+
+- `subset()`
+- `filter()`
+
+They save a lot of typing but sometimes are acting in a unforeseen way, when used within other functions. Either avoid using non-standard evaluation functions inside your funcitons or learn the surprising cases and protect against them.
+
+```{r}
+library(dplyr)
+
+big_x <- function(df, threshold) {
+  dplyr::filter(df, x > threshold)
+}
+
+head(big_x(diamonds, 7))
+```
+
+Hadley's vignette on [non-standard evaluation](http://rpubs.com/hadley/157957).
+
+We want the following in our next function: 
+
+- dataframe must contain variable x
+- dataframe must not contain variable threshold
+
+```r
+big_x <- function(df, threshold) {
+  # Write a check for x not being in df
+  if ( !any("x" == colnames(df)) ){
+    stop("df must contain variable called x", .call = FALSE)
+  }
+  # Write a check for threshold being in df
+  if (any("threshold" == colnames(df))){
+    stop("df must not contain variable called threshold")
+  }
+  dplyr::filter(df, x > threshold)
+}
+```
+
+### Hidden arguments
+
+1. Their output only depends on their inputs
+2. They don't affect the outside world except through their return value.
+
+- Hidden arguments are funtion inputs that may be different for different users or sessions
+- common example: arguments defaults that depend on global options
+
+```{r}
+# viewing global options
+head(options(), 3)
+
+# specific global options
+getOption("digits")
+
+# change to 5
+options(digits = 5)
+getOption("digits")
+
+# change back to default
+options(digits = 7)
+getOption("digits")
+```
+
+- Return value of a function should never depend on a global option
+- Side effects however may be controlled by global options
+
+```{r}
+# This is the default behavior
+options(stringsAsFactors = TRUE)
+
+# load pools
+pools <- read.csv("https://assets.datacamp.com/production/repositories/182/datasets/0badb39b50c7daf000698efbca476716db7c1a6f/swimming_pools.csv")
+
+# Examine the structure of pools
+str(pools)
+
+# Change the global stringsAsFactors option to FALSE
+options(stringsAsFactors = FALSE)
+
+# load pools again
+pools2 <- read.csv("https://assets.datacamp.com/production/repositories/182/datasets/0badb39b50c7daf000698efbca476716db7c1a6f/swimming_pools.csv")
+
+# Examine the structure of pools2
+str(pools2)
+
+# restore default 
+options(stringsAsFactors = TRUE)
+```
+
+Wrap up:
+
+**Writing functions:**
+
+- If you have copy-and-pasted two times, it's time to write a function
+- Solve the simple problem outside, before writing the function
+- A good function is both correct and understandable
+
+**Functional Programming**
+
+- Use functions that write the correct for loops for you. Abstract away the pattern, so you can focus on the data and actions
+- Solve iteration problems more easily and have more understandable code.
+
+**Unusual Inputs and Outputs:**
+
+- Deal with failure using `safely()`
+- Iterate over two or more arguments 
+- Iterate funcitons for their side effects
+
+**Write functions taht don't suprise**
+
+- Use stop() and stopifnot() to fail early
+- Avoid using type-inconsistent functions in your own functions
+- Avoid non-standard evaluation functions in your own functions
+- Never rely on global options for computational details
+
+However, focus on solving the problme that you're working on and never feel bad about using a for loop. Get a funciton that works right, for the easiest 80% of the problem. In time, you'll learn how to get to 99% wiht minimal extra effort. Concise and elegant code is something to strive towards!
+
 
 
 
